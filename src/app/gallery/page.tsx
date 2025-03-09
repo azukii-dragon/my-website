@@ -5,13 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/app/context/AuthContext';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import type { Crop } from 'react-image-crop';
-import 'react-image-crop/dist/ReactCrop.css';
 import Image from 'next/image';
-
-const ReactCrop = dynamic(() => import('react-image-crop'), {
-  ssr: false,
-});
 
 interface GalleryImage {
   url: string;
@@ -33,14 +27,6 @@ function GalleryContent() {
   const { isAuthenticated } = useAuth();
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isCropping, setIsCropping] = useState(false);
-  const [crop, setCrop] = useState<Crop>({
-    unit: '%',
-    width: 100,
-    height: 100,
-    x: 0,
-    y: 0
-  });
   const imageRef = useRef<HTMLImageElement>(null);
 
   const categories: { id: Category; label: string }[] = [
@@ -127,41 +113,8 @@ function GalleryContent() {
   };
 
   const getCroppedImg = () => {
-    if (!imageRef.current || !editingImage) return;
-
-    const canvas = document.createElement('canvas');
-    const scaleX = imageRef.current.naturalWidth / imageRef.current.width;
-    const scaleY = imageRef.current.naturalHeight / imageRef.current.height;
-    canvas.width = crop.width;
-    canvas.height = crop.height;
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) return;
-
-    const image = document.createElement('img');
-    image.src = editingImage.url;
-    
-    ctx.drawImage(
-      image,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
-      0,
-      0,
-      crop.width,
-      crop.height
-    );
-
-    return canvas.toDataURL('image/jpeg');
-  };
-
-  const handleCropComplete = () => {
-    const croppedImageUrl = getCroppedImg();
-    if (croppedImageUrl && editingImage) {
-      setEditingImage({ ...editingImage, url: croppedImageUrl });
-      setIsCropping(false);
-    }
+    // Since we're not using cropping functionality, we can return null
+    return null;
   };
 
   const handleSaveEdit = (updatedCaption: string, updatedCategory: Category) => {
@@ -176,7 +129,6 @@ function GalleryContent() {
     localStorage.setItem('gallery_images', JSON.stringify(updatedImages));
     setIsEditModalOpen(false);
     setEditingImage(null);
-    setIsCropping(false);
   };
 
   const filteredImages = images.filter(image => 
@@ -366,7 +318,6 @@ function GalleryContent() {
                           onClick={() => {
                             setIsEditModalOpen(false);
                             setEditingImage(null);
-                            setIsCropping(false);
                           }}
                           className="px-4 py-2 text-gray-600 hover:text-gray-700 dark:text-gray-300"
                         >
