@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Jua, Nanum_Pen_Script } from "next/font/google";
 import "./globals.css";
-import Navigation from "@/components/layout/Navigation";
+import Navigation from "./components/Navigation";
 import Providers from "./components/Providers";
 
 const jua = Jua({ 

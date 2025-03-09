@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/app/context/AuthContext';
-import ReactCrop, { Crop } from 'react-image-crop';
-import 'react-image-crop/dist/ReactCrop.css';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import type { Crop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+import Image from 'next/image';
+
+const ReactCrop = dynamic(() => import('react-image-crop'), {
+  ssr: false,
+});
 
 interface GalleryImage {
   url: string;
@@ -16,7 +22,7 @@ interface GalleryImage {
 
 type Category = 'all' | 'my-art' | 'bambi' | 'animanga';
 
-export default function Gallery() {
+function GalleryContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category') as Category;
   
@@ -56,53 +62,54 @@ export default function Gallery() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        // Create a temporary image to compress
-        const img = new Image();
-        img.onload = () => {
-          // Create canvas for compression
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          
-          // Max dimensions
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
-          
-          // Calculate new dimensions while maintaining aspect ratio
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
+        if (typeof reader.result === 'string') {
+          const img = document.createElement('img');
+          img.onload = () => {
+            // Create canvas for compression
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            // Max dimensions
+            const MAX_WIDTH = 800;
+            const MAX_HEIGHT = 800;
+            
+            // Calculate new dimensions while maintaining aspect ratio
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
             }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          
-          // Draw and compress
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          // Get compressed image data (0.7 quality)
-          const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
-          
-          const newImage: GalleryImage = {
-            url: compressedUrl,
-            caption: newCaption,
-            timestamp: Date.now(),
-            category: newCategory
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            
+            // Get compressed image data (0.7 quality)
+            const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
+            
+            const newImage: GalleryImage = {
+              url: compressedUrl,
+              caption: newCaption,
+              timestamp: Date.now(),
+              category: newCategory
+            };
+            const updatedImages = [...images, newImage];
+            setImages(updatedImages);
+            localStorage.setItem('gallery_images', JSON.stringify(updatedImages));
+            setNewCaption('');
           };
-          const updatedImages = [...images, newImage];
-          setImages(updatedImages);
-          localStorage.setItem('gallery_images', JSON.stringify(updatedImages));
-          setNewCaption('');
-        };
-        img.src = reader.result as string;
+          img.src = reader.result;
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -131,7 +138,7 @@ export default function Gallery() {
 
     if (!ctx) return;
 
-    const image = new Image();
+    const image = document.createElement('img');
     image.src = editingImage.url;
     
     ctx.drawImage(
@@ -248,11 +255,14 @@ export default function Gallery() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="relative group"
               >
-                <div className="aspect-square overflow-hidden rounded-lg bg-black/20 backdrop-blur-sm">
-                  <img
+                <div className="aspect-square overflow-hidden rounded-lg bg-black/20 backdrop-blur-sm relative">
+                  <Image
                     src={image.url}
                     alt={image.caption}
-                    className="w-full h-full object-cover"
+                    width={500}
+                    height={500}
+                    className="object-cover w-full h-full"
+                    priority={false}
                   />
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-b-lg">
@@ -310,55 +320,16 @@ export default function Gallery() {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Image
                         </label>
-                        <div className="relative">
-                          {isCropping ? (
-                            <div>
-                              <ReactCrop
-                                crop={crop}
-                                onChange={(c) => setCrop(c)}
-                                aspect={1}
-                              >
-                                <img
-                                  ref={imageRef}
-                                  src={editingImage.url}
-                                  alt="Crop me"
-                                  className="max-w-full h-auto"
-                                />
-                              </ReactCrop>
-                              <div className="mt-4 flex justify-center gap-4">
-                                <button
-                                  type="button"
-                                  onClick={handleCropComplete}
-                                  className="bg-[#7d8fb0] text-white px-4 py-2 rounded-md hover:bg-[#6b7a96]"
-                                >
-                                  Apply Crop
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setIsCropping(false)}
-                                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="relative">
-                              <img
-                                src={editingImage.url}
-                                alt={editingImage.caption}
-                                className="w-full h-auto rounded-md"
-                              />
-                              <button
-                                onClick={() => setIsCropping(true)}
-                                className="absolute top-2 right-2 bg-[#7d8fb0] text-white p-2 rounded-full hover:bg-[#6b7a96] transition-colors"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-8 8-4-4" />
-                                </svg>
-                              </button>
-                            </div>
-                          )}
+                        <div className="relative w-full h-[400px]">
+                          <Image
+                            ref={imageRef}
+                            src={editingImage.url}
+                            alt={editingImage.caption}
+                            width={800}
+                            height={800}
+                            className="max-w-full max-h-[80vh] object-contain"
+                            priority
+                          />
                         </div>
                       </div>
 
@@ -417,5 +388,13 @@ export default function Gallery() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function Gallery() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GalleryContent />
+    </Suspense>
   );
 } 

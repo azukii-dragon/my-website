@@ -1,22 +1,26 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { Suspense } from 'react';
 
 interface PaymentDetails {
   name: string;
   email: string;
-  message: string;
+  cardNumber: string;
+  expiryDate: string;
+  cvv: string;
 }
 
-export default function PaymentPage() {
+function PaymentForm() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
     name: '',
     email: '',
-    message: ''
+    cardNumber: '',
+    expiryDate: '',
+    cvv: ''
   });
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -29,12 +33,7 @@ export default function PaymentPage() {
     setIsProcessing(true);
     
     try {
-      // Here we would integrate with a payment processor
-      // For now, just show a success message
       alert('Thank you for your support! We will contact you soon with your rewards.');
-      router.push('/pets');
-    } catch (error) {
-      alert('There was an error processing your payment. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -88,65 +87,50 @@ export default function PaymentPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Message (Optional)
+                  Card Number
                 </label>
-                <textarea
-                  value={paymentDetails.message}
-                  onChange={(e) => setPaymentDetails({ ...paymentDetails, message: e.target.value })}
+                <input
+                  type="text"
+                  required
+                  value={paymentDetails.cardNumber}
+                  onChange={(e) => setPaymentDetails({ ...paymentDetails, cardNumber: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700"
-                  rows={3}
-                  placeholder="Any special requests or messages?"
+                  placeholder="1234 5678 9012 3456"
                 />
               </div>
 
-              {/* Payment details section */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                  Payment Details
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Card Number
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700"
-                      placeholder="1234 5678 9012 3456"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Expiry Date
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700"
-                        placeholder="MM/YY"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        CVC
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700"
-                        placeholder="123"
-                      />
-                    </div>
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Expiry Date
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={paymentDetails.expiryDate}
+                    onChange={(e) => setPaymentDetails({ ...paymentDetails, expiryDate: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700"
+                    placeholder="MM/YY"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    CVC
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={paymentDetails.cvv}
+                    onChange={(e) => setPaymentDetails({ ...paymentDetails, cvv: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700"
+                    placeholder="123"
+                  />
                 </div>
               </div>
 
               <div className="flex justify-between items-center mt-6">
                 <button
                   type="button"
-                  onClick={() => router.back()}
                   className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                   Go Back
@@ -166,5 +150,13 @@ export default function PaymentPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PaymentForm />
+    </Suspense>
   );
 } 

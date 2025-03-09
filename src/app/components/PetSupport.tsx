@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
@@ -54,11 +53,8 @@ const supportTiers: SupportTier[] = [
 
 export default function PetSupport() {
   const router = useRouter();
-  const [selectedTier, setSelectedTier] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSupport = async (tier: SupportTier) => {
-    // Redirect to payment page with tier details
     router.push(`/pets/payment?tier=${encodeURIComponent(tier.name)}&price=${encodeURIComponent(tier.price)}`);
   };
 
@@ -74,9 +70,7 @@ export default function PetSupport() {
           <motion.div
             key={tier.id}
             whileHover={{ scale: 1.02 }}
-            className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden ${
-              selectedTier === tier.id ? 'ring-2 ring-indigo-500' : ''
-            }`}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden"
           >
             <div className="p-6">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{tier.name}</h3>
@@ -96,12 +90,9 @@ export default function PetSupport() {
               </div>
               <button
                 onClick={() => handleSupport(tier)}
-                disabled={isProcessing}
-                className={`w-full bg-[#7d8fb0] hover:bg-[#6b7a96] text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 ${
-                  isProcessing ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className="w-full bg-[#7d8fb0] hover:bg-[#6b7a96] text-white font-bold py-2 px-4 rounded-md transition-colors duration-200"
               >
-                {isProcessing ? 'Processing...' : 'Support Now'}
+                Support Now
               </button>
             </div>
           </motion.div>

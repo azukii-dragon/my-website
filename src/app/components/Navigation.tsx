@@ -1,62 +1,48 @@
 "use client";
 
 import Link from 'next/link';
+import { useAuth } from '../context/AuthContext';
 import { usePathname } from 'next/navigation';
 
 export default function Navigation() {
+  const { isAuthenticated, logout } = useAuth();
   const pathname = usePathname();
 
   return (
-    <nav className="bg-gray-800 text-white p-4">
-      <div className="max-w-7xl mx-auto flex items-center">
-        <Link 
-          href="/"
-          className="text-2xl font-bold mr-8"
-        >
-          My Website
-        </Link>
-        <div className="flex space-x-6 flex-grow">
-          <Link 
-            href="/" 
-            className={`text-xl hover:text-gray-300 ${pathname === '/' ? 'border-b-2 border-blue-400' : ''}`}
-          >
-            Home
+    <nav className="bg-[#2c3440] p-4">
+      <div className="max-w-6xl mx-auto flex justify-between items-center">
+        <div className="flex items-center space-x-4">
+          <Link href="/" className={`text-white hover:text-gray-300 ${pathname === '/' ? 'font-bold' : ''}`}>
+            azuki&apos;s page
           </Link>
-          <Link 
-            href="/bio" 
-            className={`text-xl hover:text-gray-300 ${pathname === '/bio' ? 'border-b-2 border-blue-400' : ''}`}
-          >
+          <Link href="/bio" className={`text-white hover:text-gray-300 ${pathname === '/bio' ? 'font-bold' : ''}`}>
             Bio
           </Link>
-          <Link 
-            href="/gallery" 
-            className={`text-xl hover:text-gray-300 ${pathname === '/gallery' ? 'border-b-2 border-blue-400' : ''}`}
-          >
-            Gallery
-          </Link>
-          <Link 
-            href="/pets" 
-            className={`text-xl hover:text-gray-300 ${pathname === '/pets' ? 'border-b-2 border-blue-400' : ''}`}
-          >
+          <Link href="/pets" className={`text-white hover:text-gray-300 ${pathname === '/pets' ? 'font-bold' : ''}`}>
             Pets
           </Link>
-          <Link 
-            href="/posts" 
-            className={`text-xl hover:text-gray-300 ${pathname === '/posts' ? 'border-b-2 border-blue-400' : ''}`}
-          >
+          <Link href="/gallery" className={`text-white hover:text-gray-300 ${pathname === '/gallery' ? 'font-bold' : ''}`}>
+            Gallery
+          </Link>
+          <Link href="/posts" className={`text-white hover:text-gray-300 ${pathname === '/posts' ? 'font-bold' : ''}`}>
             Posts
           </Link>
-          <Link 
-            href="/admin" 
-            className={`text-xl hover:text-gray-300 ${pathname === '/admin' ? 'border-b-2 border-blue-400' : ''}`}
-          >
-            Admin
-          </Link>
         </div>
-        <div className="flex items-center">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-            Logout
-          </button>
+        <div className="flex items-center space-x-4">
+          {isAuthenticated ? (
+            <>
+              <Link href="/admin" className={`text-white hover:text-gray-300 ${pathname === '/admin' ? 'font-bold' : ''}`}>
+                Admin
+              </Link>
+              <button onClick={logout} className="text-white hover:text-gray-300">
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className={`text-white hover:text-gray-300 ${pathname === '/login' ? 'font-bold' : ''}`}>
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>

@@ -33,7 +33,7 @@ const defaultPet: Pet = {
 };
 
 export default function Pets() {
-  const { logout, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [pets, setPets] = useState<Pet[]>(() => {
     try {
       // Try to get existing pets from localStorage
@@ -291,70 +291,65 @@ export default function Pets() {
               className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
             >
               <div className="relative">
-                {pet.image ? (
-                  <div className="relative w-full h-64">
-                    {pet.image.startsWith('data:') ? (
-                      <img
-                        src={pet.image}
-                        alt={pet.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <Image
-                        src={pet.image}
-                        alt={pet.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover"
-                      />
-                    )}
-                    {isAuthenticated && (
-                      <div className="absolute top-2 right-2 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleEdit(pet);
-                          }}
-                          className="bg-[#7d8fb0] text-white hover:bg-[#6b7a96] p-2 rounded-full transition-colors duration-200"
-                        >
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDuplicate(pet);
-                          }}
-                          className="bg-[#7d8fb0] text-white hover:bg-[#6b7a96] p-2 rounded-full transition-colors duration-200"
-                        >
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDelete(pet.id);
-                          }}
-                          className="bg-[#7d8fb0] text-white hover:bg-[#6b7a96] p-2 rounded-full transition-colors duration-200"
-                        >
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                {pet.image && pet.image.startsWith('data:') ? (
+                  <Image
+                    src={pet.image}
+                    alt={pet.name}
+                    width={500}
+                    height={500}
+                    className="w-full h-full object-cover"
+                    unoptimized
+                  />
                 ) : (
-                  <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                    <span className="text-gray-400 dark:text-gray-500">No image</span>
+                  <Image
+                    src={pet.image || '/placeholder.jpg'}
+                    alt={pet.name}
+                    width={500}
+                    height={500}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                {isAuthenticated && (
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleEdit(pet);
+                      }}
+                      className="bg-[#7d8fb0] text-white hover:bg-[#6b7a96] p-2 rounded-full transition-colors duration-200"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDuplicate(pet);
+                      }}
+                      className="bg-[#7d8fb0] text-white hover:bg-[#6b7a96] p-2 rounded-full transition-colors duration-200"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDelete(pet.id);
+                      }}
+                      className="bg-[#7d8fb0] text-white hover:bg-[#6b7a96] p-2 rounded-full transition-colors duration-200"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 )}
               </div>
@@ -455,10 +450,13 @@ export default function Pets() {
                             </div>
                           ) : previewImage ? (
                             <div className="relative w-full h-48 mb-4">
-                              <img
+                              <Image
                                 src={previewImage}
                                 alt="Preview"
-                                className="w-full h-full object-contain rounded-md"
+                                width={800}
+                                height={800}
+                                className="max-w-full max-h-[80vh] object-contain"
+                                unoptimized={previewImage?.startsWith('data:')}
                               />
                               <button
                                 type="button"
